@@ -13,12 +13,12 @@ type BaseInfo struct {
 type AtomInfo struct {
 	UpdateTime time.Time
 	Method     string
-	Value      string
+	Value      string `json:"value"`
 }
 
 // HostInfo for storage infomation of each host.
 type HostInfo struct {
 	BaseInfo
-	HostName string
-	Info     map[string]*AtomInfo
+	HostName string               `json:"hostname"`
+	Info     map[string]*AtomInfo `json:"info"`
 }

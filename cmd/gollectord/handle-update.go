@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"html/template"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"strings"
@@ -41,37 +43,42 @@ func handleUpdate(w http.ResponseWriter, r *http.Request) {
 	}
 	hostName := pathSplits[2]
 
-	err := r.ParseForm()
+	defer r.Body.Close()
+	rBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		log.Println("handleUpdate=>ParseForm", err)
+		log.Println("handleUpdate=>ReadRequestBody", err)
 		t, _ := template.ParseFiles("template/rawtext.gtpl")
 		w.WriteHeader(http.StatusBadRequest)
-		t.Execute(w, "Parse post form error, please check the post data.")
+		t.Execute(w, "Read request body error.")
 		return
 	}
 
-	if _, ok := allHostsInfo[hostName]; !ok {
-		allHostsInfo[hostName] = new(model.HostInfo)
+	hInfo := new(model.HostInfo)
+	hInfo.HostName = hostName
+	jsonErr := json.Unmarshal(rBody, hInfo)
+	if jsonErr != nil {
+		log.Println("handleUpdate=>JsonUnmarshal", jsonErr)
+		t, _ := template.ParseFiles("template/rawtext.gtpl")
+		w.WriteHeader(http.StatusBadRequest)
+		t.Execute(w, "Parse json failed, please post request as given json format.")
+		return
 	}
-	allHostsInfo[hostName].HostName = hostName
-	if allHostsInfo[hostName].Info == nil {
-		allHostsInfo[hostName].Info = make(map[string]*model.AtomInfo)
-	}
-	for k := range r.PostForm {
-		if _, ok := allHostsInfo[hostName].Info[k]; !ok {
-			allHostsInfo[hostName].Info[k] = new(model.AtomInfo)
+
+	if _, ok := allHostsInfo[hostName]; ok {
+		for k, v := range hInfo.Info {
+			v.UpdateTime = time.Now().UTC()
+			allHostsInfo[hostName].Info[k] = v
 		}
-		allHostsInfo[hostName].Info[k].Value = r.PostFormValue(k)
-		allHostsInfo[hostName].Info[k].UpdateTime = time.Now().UTC()
+	} else {
+		for k := range hInfo.Info {
+			hInfo.Info[k].UpdateTime = time.Now().UTC()
+		}
+		allHostsInfo[hostName] = hInfo
 	}
 
 	t, _ := template.ParseFiles("template/rawtext.gtpl")
 	w.WriteHeader(http.StatusOK)
 	t.Execute(w, "POST success.")
 
-	// DEBUG
-	log.Println("hostinfo:", allHostsInfo[hostName])
-	log.Println("atominfo-a:", allHostsInfo[hostName].Info["a"])
-	log.Println("atominfo-b:", allHostsInfo[hostName].Info["b"])
 	return
 }
