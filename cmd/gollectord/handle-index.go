@@ -13,7 +13,7 @@ func handleIndex(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	t, _ := template.ParseFiles("template/index.gtpl")
+	t, _ := template.ParseFiles("template/index.html")
 	t.Execute(w, r.URL.Path)
 	return
 }

@@ -23,6 +23,7 @@ func init() {
 
 func main() {
 	http.HandleFunc("/", handleIndex)
+	http.HandleFunc("/hosts/", handleHosts)
 	http.HandleFunc("/update/", handleUpdate)
 	http.Handle("/static/", http.StripPrefix("/static/",
 		http.FileServer(http.Dir("static"))))
