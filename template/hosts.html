@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta content="text/html; charset=utf-8">
+		<title>List Hosts</title>
+		<link rel="stylesheet" type="text/css" href="/static/css/pages.css" />
+	</head>
+	<body class="content">
+		<h2>Search</h2>
+		<form action="/hosts/" method="post" name="hosts">
+			Keyword:<input type="text" name="keyword" value="{{.Keyword}}">
+			</br>
+			Category:
+			<input type="checkbox" name="field" value="hostname"
+				checked="checked">主机名
+			<input type="checkbox" name="field" value="key"
+				checked="checked">参数名
+			<input type="checkbox" name="field" value="value"
+				checked="checked">参数值
+			</br>
+			<button type="submit" class="btn btn-cyan btn-fix">按照所选域筛选</button>
+		</form>
+		<h3>Hosts List</h3>
+		<table border=1>
+		{{with .}}{{range .}}
+			{{$hostName := .HostName}}
+			{{with .Info}}{{range $k, $v := .}}
+			<tr>
+				<td>
+					<a href="/host/{{$hostName}}">{{$hostName}}</a>
+				</td>
+				<td>
+					<pre>{{$k}}</pre>
+				</td>
+				<td>
+					<pre>{{$v.Value}}</pre>
+				</td>
+			</tr>
+			{{end}}{{end}}
+		{{end}}{{end}}
+		</table>
+	</body>
+</html>
