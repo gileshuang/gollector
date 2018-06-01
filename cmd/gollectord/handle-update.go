@@ -64,7 +64,10 @@ func handleUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if _, ok := allHostsInfo[hostName]; ok {
+	lockHostInfo.RLock()
+	_, ok := allHostsInfo[hostName]
+	lockHostInfo.RUnlock()
+	if ok {
 		for k, v := range hInfo.Info {
 			v.UpdateTime = time.Now().UTC()
 			allHostsInfo[hostName].Info[k] = v
@@ -73,7 +76,9 @@ func handleUpdate(w http.ResponseWriter, r *http.Request) {
 		for k := range hInfo.Info {
 			hInfo.Info[k].UpdateTime = time.Now().UTC()
 		}
+		lockHostInfo.Lock()
 		allHostsInfo[hostName] = hInfo
+		lockHostInfo.Unlock()
 	}
 
 	t, _ := template.ParseFiles("template/rawtext.html")

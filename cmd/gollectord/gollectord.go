@@ -4,6 +4,7 @@ import (
 	"flag"
 	"log"
 	"net/http"
+	"sync"
 
 	"github.com/gileshuang/gollector/lib/model"
 )
@@ -11,6 +12,7 @@ import (
 var (
 	servHTTP     string
 	allHostsInfo map[string]*model.HostInfo
+	lockHostInfo *sync.RWMutex
 )
 
 func init() {
@@ -19,6 +21,7 @@ func init() {
 	flag.Parse()
 
 	allHostsInfo = make(map[string]*model.HostInfo)
+	lockHostInfo = new(sync.RWMutex)
 }
 
 func main() {

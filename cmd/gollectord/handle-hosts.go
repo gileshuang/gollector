@@ -41,6 +41,7 @@ func handleHosts(w http.ResponseWriter, r *http.Request) {
 			bSrchValue = true
 		}
 	}
+	lockHostInfo.RLock()
 	for k, v := range allHostsInfo {
 		if bSrchName == true && strings.Contains(k, keyWord) {
 			res[k] = allHostsInfo[k]
@@ -58,6 +59,7 @@ func handleHosts(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
+	lockHostInfo.RUnlock()
 
 	t, err := template.ParseFiles("template/hosts.html")
 	if err != nil {
