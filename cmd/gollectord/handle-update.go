@@ -70,7 +70,9 @@ func handleUpdate(w http.ResponseWriter, r *http.Request) {
 	if ok {
 		for k, v := range hInfo.Info {
 			v.UpdateTime = time.Now().UTC()
+			lockHostInfo.Lock()
 			allHostsInfo[hostName].Info[k] = v
+			lockHostInfo.Unlock()
 		}
 	} else {
 		for k := range hInfo.Info {
